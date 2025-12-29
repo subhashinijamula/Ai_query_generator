@@ -19,11 +19,21 @@ query = st.text_input("Enter your query")
 
 # AI Model for generating content
 model = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction="You are a helpful assistant. For any given query, provide a brief and summary of the topic and include relevant YouTube links for learning more about it. Ensure the YouTube links are educational and appropriate for the topic.")
+tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
 def search(query):
-    # Perform search using TavilyClient
-    return tavily.get_search_context(query, include_domains=["youtube.com", "wikipedia.org", "google.com"])
+    response = tavily.search(
+        query=query,
+        search_depth="basic",
+        include_domains=["youtube.com"],
+        max_results=5
+    )
 
+    content = ""
+    for item in response.get("results", []):
+        content += item.get("content", "") + "\n"
+
+    return content
 def extract_youtube_links(text):
     # Regular expression to find YouTube video IDs
     youtube_regex = r'(?:https?://(?:www\.)?youtube\.com/watch\?v=|https?://youtu\.be/)([\w-]+)'
@@ -68,3 +78,4 @@ if st.button("Submit"):
         wikipedia_results = re.findall(r'(https?://(?:www\.)?wikipedia\.org[^"]+)', response)
         for result in wikipedia_results:
             st.write(f"[Wikipedia Result]({result})")
+
