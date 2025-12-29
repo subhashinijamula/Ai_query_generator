@@ -2,3 +2,4 @@ streamlit
 tavily
 python-dotenv
 google-generativeai
+requests
